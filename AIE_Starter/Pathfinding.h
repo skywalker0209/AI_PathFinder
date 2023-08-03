@@ -22,6 +22,9 @@ namespace AIForGames
     {
         glm::vec2 position;
         std::vector<Edge>connections;
+
+
+
         Node(float x, float y)
         {
             position.x = x;
