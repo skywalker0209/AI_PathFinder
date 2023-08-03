@@ -218,4 +218,3 @@ void NodeMap::DrawPath(const std::vector<Node*>& path, Color& color)
         );
     }
 }
-}

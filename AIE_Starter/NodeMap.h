@@ -25,6 +25,7 @@ public:
 
 	void Draw();
 	static std::vector<Node*> AStarSearch(Node* startNode, Node* endNode);
-	Node* NodeMap::GetClosestNode(glm::vec2 worldPos);
+	static void DrawPath(const std::vector<Node*>& path, Color& color);
+	Node* GetClosestNode(glm::vec2 worldPos);
 };
 
