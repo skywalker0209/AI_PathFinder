@@ -22,8 +22,9 @@ public:
 	{
 		return nodes[x + width * y];
 	}
-
 	void Draw();
 	static std::vector<Node*> DijkstraSearch(Node* startNode, Node* endNode);
+	static void DrawPath(const std::vector<Node*>& path, Color& color);
+	Node* GetClosestNode(glm::vec2 worldPos);
 };
 

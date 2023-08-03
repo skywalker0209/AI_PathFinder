@@ -24,8 +24,8 @@
 #include <string>
 #include "NodeMap.h"
 
-
 using namespace AIForGames;
+
 
 int main(int argc, char* argv[])
 {
@@ -34,11 +34,13 @@ int main(int argc, char* argv[])
     int screenWidth = 800;
     int screenHeight = 450;
 
-    InitWindow(screenWidth, screenHeight, "raylib [core] example - basic window");
+    InitWindow(screenWidth, screenHeight, "PathFinding");
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
 
+    NodeMap nodeMap;
+    int cellSize = 50;
     std::vector<std::string> asciiMap; // 0 wall 1 path
     asciiMap.push_back("000000000000");
     asciiMap.push_back("010111011100");
@@ -48,15 +50,33 @@ int main(int argc, char* argv[])
     asciiMap.push_back("010000001000");
     asciiMap.push_back("011111111110");
     asciiMap.push_back("000000000000");
-
-    NodeMap nodeMap;
-
-    nodeMap.Init(asciiMap, 50);
+    nodeMap.Init(asciiMap, cellSize);
+    
+    Node* start = nodeMap.GetNode(1, 1);
+    Node* end = nodeMap.GetNode(10, 2);
+    std::vector<Node*> nodeMapPath = NodeMap::DijkstraSearch(start, end);
+    Color lineColor = { 255, 255, 255, 255 };;
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
         // Update
+        if (IsMouseButtonPressed(0))
+        {
+            Vector2 mousePos = GetMousePosition();
+            Node* target = nodeMap.GetClosestNode(glm::vec2(mousePos.x, mousePos.y));
+            start = target == nullptr ? start : target;            
+            nodeMapPath = NodeMap::DijkstraSearch(start, end);
+        }
+
+        if (IsMouseButtonPressed(1))
+        {
+            Vector2 mousePos = GetMousePosition();
+            Node* target = nodeMap.GetClosestNode(glm::vec2(mousePos.x, mousePos.y));
+            end = target == nullptr ? end : target;
+            nodeMapPath = NodeMap::DijkstraSearch(start, end);
+        }
+
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
         //----------------------------------------------------------------------------------
@@ -68,8 +88,10 @@ int main(int argc, char* argv[])
         ClearBackground(RAYWHITE);
 
         nodeMap.Draw();
+        
+        NodeMap::DrawPath(nodeMapPath, lineColor);
+        
 
-        //DrawText("Congrats! You created your first window!", 190, 200, 20, LIGHTGRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
