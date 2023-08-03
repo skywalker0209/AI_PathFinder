@@ -122,75 +122,100 @@ bool NodeMap::NodeInList(std::vector<Node*> List)
     return true;
 }
 
-std::vector<Node*> NodeMap::DijkstrasSearch(Node* startNode, Node* endNode)
+std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
 {
-    std::vector<Node*> openList;
-    bool found = NodeInList(openList);
+    if (startNode == nullptr || endNode == nullptr)
+    {
+        std::cout << "Error: Invalid Start or End Node" << std::endl;
+        return std::vector<Node*>();
+    }
+    else if (startNode == endNode)
+    {
+        return std::vector<Node*>();
+    }
 
-    /*Procedure dijkstrasSearch(startNode, endNode)
-        // Validate the input
-        if startNode is null OR endNode is null
-            Raise Error
+    std::priority_queue<std::pair<float, Node*>, std::vector<std::pair<float, Node*>>, std::greater<std::pair<float, Node*>>> openList;
+    std::unordered_map<Node*, Node*> cameFrom;
+    std::unordered_map<Node*, float> gScore;
+    std::unordered_map<Node*, float> fScore;
 
-            if startNode == endNode
-                return empty Path
+    gScore[startNode] = 0.0f;
+    fScore[startNode] = glm::distance(startNode->position, endNode->position);
 
-                // Initialise the starting node
-                Set startNode.gScore to 0
-                Set startNode.previous to null
+    openList.push({ fScore[startNode], startNode });
 
-                // Create our temporary lists for storing nodes we’re visiting/visited
-                Let openList be a List of Nodes
-                Let closedList be a List of Nodes
+    while (!openList.empty())
+    {
+        Node* current = openList.top().second;
+        openList.pop();
 
-                Add startNode to openList
+        if (current == endNode)
+        {
+            std::vector<Node*> path;
+            while (current != nullptr)
+            {
+                path.push_back(current);
+                current = cameFrom[current];
+            }
+            std::reverse(path.begin(), path.end());
+            return path;
+        }
 
-                While openList is not empty
-                Sort openList by Node.gScore
+        for (const Edge& edge : current->connections)
+        {
+            Node* neighbor = edge.target;
+            float tentative_gScore = gScore[current] + edge.cost;
 
-                Let currentNode = first item in openList
+            if (gScore.find(neighbor) == gScore.end() || tentative_gScore < gScore[neighbor])
+            {
+                cameFrom[neighbor] = current;
+                gScore[neighbor] = tentative_gScore;
+                fScore[neighbor] = gScore[neighbor] + glm::distance(neighbor->position, endNode->position);
+                openList.push({ fScore[neighbor], neighbor });
+            }
+        }
+    }
 
-                // If we visit the endNode, then we can exit early.
-                // Sorting the openList above guarantees the shortest path is found,
-                // given no negative costs (a prerequisite of the algorithm).
-                // This is an optional optimisation that improves performance,
-                // but doesn’t always guarantee the shortest path.
-                If currentNode is endNode
-                Exit While Loop
-
-                Remove currentNode from openList
-                Add currentNode to closedList
-
-                For all connections c in currentNode
-                If c.target not in closedList
-                Let gScore = currentNode.gScore + c.cost
-
-                // Have not yet visited the node.
-                // So calculate the Score and update its parent.
-                // Also add it to the openList for processing.
-                If c.target not in openList
-                Set c.target.gScore = gScore
-                Set c.target.previous = currentNode
-                Add c.target to openList
-
-                // Node is already in the openList with a valid Score.
-                // So compare the calculated Score with the existing
-                // to find the shorter path.
-                Else if (gScore < c.target.gScore)
-                Set c.target.gScore = gScore
-                Set c.target.previous = currentNode
-
-                // Create Path in reverse from endNode to startNode
-                Let Path be a list of Nodes
-                Let currentNode = endNode
-
-                While currentNode is not null
-                Add currentNode to beginning of Path
-                Set currentNode = currentNode.previous
-
-                // Return the path for navigation between startNode/endNode
-                Return Path
-                */
-
+    std::cout << "No path found!" << std::endl;
     return std::vector<Node*>();
+}
+
+Node* NodeMap::GetNode(int x, int y)
+{
+    if (x >= 0 && x < width && y >= 0 && y < height)
+    {
+        return nodes[x + width * y];
+    }
+    return nullptr;
+}
+
+Node* NodeMap::GetClosestNode(glm::vec2 worldPos)
+{
+    int i = static_cast<int>(worldPos.x / cellSize);
+    if (i < 0 || i >= width) return nullptr;
+
+    int j = static_cast<int>(worldPos.y / cellSize);
+    if (j < 0 || j >= height) return nullptr;
+
+    return GetNode(i, j);
+}
+
+void NodeMap::DrawPath(const std::vector<Node*>& path, Color& color)
+{
+    if (path.size() < 2)
+        return;
+    for (size_t i = 0; i < path.size() - 1; i++)
+    {
+        Node* nodeA = path[i];
+        Node* nodeB = path[i + 1];
+
+        DrawLine(
+            (int)nodeA->position.x,
+            (int)nodeA->position.y,
+            (int)nodeB->position.x,
+            (int)nodeB->position.y,
+            color
+        );
+    }
+}
 }

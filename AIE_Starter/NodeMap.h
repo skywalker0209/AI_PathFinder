@@ -24,6 +24,7 @@ public:
 	}
 
 	void Draw();
-	static std::vector<Node*> DijkstrasSearch(Node* startNode, Node* endNode);
+	static std::vector<Node*> AStarSearch(Node* startNode, Node* endNode);
+	Node* NodeMap::GetClosestNode(glm::vec2 worldPos);
 };
 
