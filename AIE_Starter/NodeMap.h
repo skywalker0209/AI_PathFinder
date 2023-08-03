@@ -24,6 +24,6 @@ public:
 	}
 
 	void Draw();
-
+	static std::vector<Node*> DijkstraSearch(Node* startNode, Node* endNode);
 };
 

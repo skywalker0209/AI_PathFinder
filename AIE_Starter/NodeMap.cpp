@@ -122,3 +122,100 @@ bool NodeMap::NodeInList(std::vector<Node*> List)
     return true;
 }
 
+std::vector<Node*> NodeMap::DijkstraSearch(Node* startNode, Node* endNode)
+{
+    // Validate the input
+
+    if (startNode == nullptr || endNode == nullptr)
+    {
+        std::cout << "Error Invalid Start or End Node \n" << std::endl;
+        return std::vector<Node*>();
+    }
+    else if (startNode == endNode)
+    {
+        return std::vector<Node*>();
+    }
+    // Initialise the starting node
+    startNode->gScore == 0;
+    startNode->previous == nullptr;
+
+    // Create our temporary lists for storing nodes we’re visiting/visited
+    std::vector<Node*> openList;
+    std::vector<Node*> closeList;
+    openList.push_back(startNode);
+    while (!openList.empty())
+    {
+        //bubble sort to get the smallest gScore to the index 0
+        for (size_t i = 0; i < openList.size() - 1; i++)
+        {
+            bool swapped = false;
+            for (size_t j = 0; j < openList.size() - i - 1; j++)
+            {
+                if (openList[j]->gScore > openList[j + 1]->gScore)
+                {
+                    //Swapped
+                    Node* temp = openList[j];
+                    openList[j] = openList[j + 1];
+                    openList[j + 1] = temp;
+                    swapped = true;
+                }
+            }
+            if (swapped == false)
+                break;
+        }
+        Node* currentNode = openList[0];
+        // If we visit the endNode, then we can exit early.
+        if (currentNode == endNode)
+        {
+            break;
+        }
+        // Sorting the openList above guarantees the shortest path is found,
+        // given no negative costs (a prerequisite of the algorithm).
+        // This is an optional optimisation that improves performance,
+        // but doesn’t always guarantee the shortest path.
+        // Remove currentNode from OpenList
+        auto it = std::find(openList.begin(), openList.end(), currentNode);
+        openList.erase(it);
+        //  Add currentNode to closedList
+        closeList.push_back(currentNode);
+        for (const Edge& edge : currentNode->connections)
+        {
+            Node* neighbor = edge.target;
+            if (std::find(closeList.begin(), closeList.end(), neighbor) == closeList.end())
+            {
+                float gScore = currentNode->gScore + edge.cost;
+                // Have not yet visited the node.
+                // So calculate the Score and update its parent.
+                // Also add it to the openList for processing.
+                if (std::find(openList.begin(), openList.end(), neighbor) == openList.end()) // If c.target not in openList
+                {
+                    neighbor->gScore = gScore;
+                    neighbor->previous = currentNode;
+                    openList.push_back(neighbor);
+                    // Node is already in the openList with a valid Score.
+                    // So compare the calculated Score with the existing
+                    // to find the shorter path.
+                }
+                else if ((gScore < neighbor->gScore))
+                {
+                    neighbor->gScore = gScore;
+                    neighbor->previous = currentNode;
+                }
+            }
+        }
+    }
+
+    // Create Path in reverse from endNode to startNode
+    std::vector<Node*> pathList;
+    Node* currentNode = endNode;
+    while (currentNode != nullptr)
+    {
+        pathList.push_back(currentNode);
+        currentNode = currentNode->previous;
+    }
+    std::reverse(pathList.begin(), pathList.end());
+    // Return the path for navigation between startNode/endNode
+    return pathList;
+}
+
+

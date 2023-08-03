@@ -24,6 +24,9 @@ namespace AIForGames
         std::vector<Edge>connections;
 
 
+        float gScore;
+        Node* previous;
+
 
         Node(float x, float y)
         {
