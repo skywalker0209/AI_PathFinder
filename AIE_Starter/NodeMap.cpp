@@ -178,7 +178,7 @@ std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
             float hScore = glm::distance(c.target->position, endNode->position);
             float fScore = gScore + hScore;
 
-            if (FindNodeInList(openList, c.target))// If c.target not in openList
+            if (!FindNodeInList(openList, c.target))// If c.target not in openList
             {
                 c.target->gScore = gScore;
                 c.target->fScore = fScore;

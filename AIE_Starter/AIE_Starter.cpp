@@ -45,7 +45,7 @@ int main(int argc, char* argv[])
     asciiMap.push_back("000000000000");
     asciiMap.push_back("010111011100");
     asciiMap.push_back("010101110110");
-    asciiMap.push_back("010100000000");
+    asciiMap.push_back("010100100000");
     asciiMap.push_back("010111111110");
     asciiMap.push_back("010000001000");
     asciiMap.push_back("011111111110");
@@ -67,6 +67,7 @@ int main(int argc, char* argv[])
             Vector2 mousePos = GetMousePosition();
             Node* target = nodeMap.GetClosestNode(glm::vec2(mousePos.x, mousePos.y));
             start = target == nullptr ? start : target;
+            path = NodeMap::AStarSearch(start, end);
         }
 
         if (IsMouseButtonPressed(1))
@@ -74,6 +75,7 @@ int main(int argc, char* argv[])
             Vector2 mousePos = GetMousePosition();
             Node* target = nodeMap.GetClosestNode(glm::vec2(mousePos.x, mousePos.y));
             end = target == nullptr ? end : target;
+            path = NodeMap::AStarSearch(start, end);
         }
 
         //----------------------------------------------------------------------------------
