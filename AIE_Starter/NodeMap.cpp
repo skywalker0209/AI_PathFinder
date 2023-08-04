@@ -29,14 +29,14 @@ void NodeMap::ConnectWestandSouth(int x, int y)
 
 void NodeMap::Init(std::vector<std::string> asciiMap, int cellSize)
 {
-    this -> cellSize = cellSize;
+    this->cellSize = cellSize;
     const char emptySquare = '0';
 
     height = asciiMap.size();
     width = asciiMap[0].size();
-    
+
     nodes = new Node * [width * height];
-    
+
     for (int y = 0; y < height; y++)
     {
         std::string& line = asciiMap[y];
@@ -44,20 +44,20 @@ void NodeMap::Init(std::vector<std::string> asciiMap, int cellSize)
         {
             std::cout << "Mismatched Line # " << y
                 << "in Ascii Map (" << line.size()
-                << "instead of " << width << std::endl;        
-        }  
+                << "instead of " << width << std::endl;
+        }
 
         for (int x = 0; x < width; x++)
         {
             char tile = (x < line.size()) ? line[x] : emptySquare;
 
             nodes[x + width * y] = tile == emptySquare ? nullptr
-            : new Node(((float)x + 0.5f) * cellSize, ((float)y + 0.5f) * cellSize);
+                : new Node(((float)x + 0.5f) * cellSize, ((float)y + 0.5f) * cellSize);
 
         }
-        
+
     }
-    for (int y = 0; y< height; y++)
+    for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
         {
@@ -68,17 +68,8 @@ void NodeMap::Init(std::vector<std::string> asciiMap, int cellSize)
 
 void NodeMap::Draw()
 {
-    Color cellColor;
-    cellColor.a = 255;
-    cellColor.r = 0;
-    cellColor.b = 255;
-    cellColor.g = 0;
-
-    Color lineColor;
-    lineColor.a = 255;
-    lineColor.r = 0;
-    lineColor.b = 0;
-    lineColor.g = 0;
+    Color cellColor{ 255,0,0,255 };
+    Color lineColor{ 255,255,255,50 };
 
     for (int y = 0; y < height; y++)
     {
@@ -101,7 +92,7 @@ void NodeMap::Draw()
             {
                 Node* other = node->connections[i].target;
                 DrawLine
-                (   (x + 0.5f) * cellSize,
+                ((x + 0.5f) * cellSize,
                     (y + 0.5f) * cellSize,
                     (int)other->position.x,
                     (int)other->position.y,
@@ -112,81 +103,113 @@ void NodeMap::Draw()
     }
 }
 
-bool NodeMap::NodeInList(std::vector<Node*> List)
+Node* NodeMap::FindNodeInList(const std::vector<Node*>& list, Node* target)
 {
-    Node* test;
-    if (std::find(List.begin(), List.end(), test) == List.end())
-    {
-        return false;
-    }
-    return true;
+    auto it = std::find(list.begin(), list.end(), target);
+    return it != list.end() ? *it : nullptr;
 }
+
+void NodeMap::BubbleSort(std::vector<Node*>& list)
+{
+    for (size_t i = 0; i < list.size() - 1; i++)
+    {
+        bool swapped = false;
+        for (size_t j = 0; j < list.size() - i - 1; j++)
+        {
+            if (list[j]->fScore > list[j + 1]->fScore)
+            {
+                // Swap elements
+                Node* temp = list[j];
+                list[j] = list[j + 1];
+                list[j + 1] = temp;
+                swapped = true;
+            }
+        }
+        if (!swapped)
+            break; // If no swap occurred in this pass, the list is already sorted.
+    }
+}
+
 
 std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
 {
     if (startNode == nullptr || endNode == nullptr)
     {
-        std::cout << "Error: Invalid Start or End Node" << std::endl;
-        return std::vector<Node*>();
+        throw std::runtime_error("Invalid Start or End Node");
     }
     else if (startNode == endNode)
     {
         return std::vector<Node*>();
     }
 
-    std::priority_queue<std::pair<float, Node*>, std::vector<std::pair<float, Node*>>, std::greater<std::pair<float, Node*>>> openList;
-    std::unordered_map<Node*, Node*> cameFrom;
-    std::unordered_map<Node*, float> gScore;
-    std::unordered_map<Node*, float> fScore;
+    // Initialise the starting node
+    startNode->gScore = 0;
+    startNode->parent = nullptr;
 
-    gScore[startNode] = 0.0f;
-    fScore[startNode] = glm::distance(startNode->position, endNode->position);
-
-    openList.push({ fScore[startNode], startNode });
+    // Create our temporary lists for storing nodes we’re visiting/visited
+    std::vector<Node*> openList;
+    std::vector<Node*> closeList;
+    openList.push_back(startNode);
+   
+    //While openList is not empty, sort openList by node.fScore
 
     while (!openList.empty())
     {
-        Node* current = openList.top().second;
-        openList.pop();
+        BubbleSort(openList);
 
-        if (current == endNode)
+        Node* currentNode = openList.front();
+        // If we visit the endNode, then we can exit early.
+        if (currentNode == endNode)
         {
-            std::vector<Node*> path;
-            while (current != nullptr)
-            {
-                path.push_back(current);
-                current = cameFrom[current];
-            }
-            std::reverse(path.begin(), path.end());
-            return path;
+            break;
         }
+        // Sorting the openList above guarantees the shortest path is found,
+        // given no negative costs (a prerequisite of the algorithm).
+        // This is an optional optimisation that improves performance,
+        // but doesn’t always guarantee the shortest path.
+        // Remove currentNode from OpenList
+        openList.erase(openList.begin());
+        //  Add currentNode to closedList
+        closeList.push_back(currentNode);
 
-        for (const Edge& edge : current->connections)
+        for (auto &c : currentNode->connections)
         {
-            Node* neighbor = edge.target;
-            float tentative_gScore = gScore[current] + edge.cost;
-
-            if (gScore.find(neighbor) == gScore.end() || tentative_gScore < gScore[neighbor])
+            if (FindNodeInList(closeList,c.target))
             {
-                cameFrom[neighbor] = current;
-                gScore[neighbor] = tentative_gScore;
-                fScore[neighbor] = gScore[neighbor] + glm::distance(neighbor->position, endNode->position);
-                openList.push({ fScore[neighbor], neighbor });
+                continue;
+            }
+            float gScore = currentNode->gScore + c.cost;
+            float hScore = Heuristic(c.target, endNode);
+            float fScore = gScore + hScore;
+
+            if (FindNodeInList(openList, c.target))// If c.target not in openList
+            {
+                c.target->gScore = gScore;
+                c.target->fScore = fScore;
+                c.target->parent = currentNode;
+                openList.push_back(c.target);
+               
+            }
+            else if (fScore < c.target->fScore)
+            {
+                c.target->gScore = gScore;
+                c.target->fScore = fScore;
+                c.target->parent = currentNode;
             }
         }
     }
 
-    std::cout << "No path found!" << std::endl;
-    return std::vector<Node*>();
-}
-
-Node* NodeMap::GetNode(int x, int y)
-{
-    if (x >= 0 && x < width && y >= 0 && y < height)
+    // Create Path in reverse from endNode to startNode
+    std::vector<Node*> pathList;
+    Node* currentNode = endNode;
+    while (currentNode != nullptr)
     {
-        return nodes[x + width * y];
+        pathList.push_back(currentNode);
+        currentNode = currentNode->previous;
     }
-    return nullptr;
+    std::reverse(pathList.begin(), pathList.end());
+    // Return the path for navigation between startNode/endNode
+    return pathList;
 }
 
 Node* NodeMap::GetClosestNode(glm::vec2 worldPos)
@@ -199,7 +222,6 @@ Node* NodeMap::GetClosestNode(glm::vec2 worldPos)
 
     return GetNode(i, j);
 }
-
 void NodeMap::DrawPath(const std::vector<Node*>& path, Color& color)
 {
     if (path.size() < 2)

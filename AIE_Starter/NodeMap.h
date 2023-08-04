@@ -14,7 +14,6 @@ class NodeMap
 	Node** nodes;
 
 	void ConnectWestandSouth(int x, int y);
-	static bool NodeInList(std::vector<Node*> List);
 
 public:
 	void Init(std::vector<std::string> asciiMap, int cellSize);
@@ -22,10 +21,12 @@ public:
 	{
 		return nodes[x + width * y];
 	}
-
 	void Draw();
 	static std::vector<Node*> AStarSearch(Node* startNode, Node* endNode);
 	static void DrawPath(const std::vector<Node*>& path, Color& color);
 	Node* GetClosestNode(glm::vec2 worldPos);
-};
 
+private:
+	static void BubbleSort(std::vector<Node*>& list);
+	static Node* FindNodeInList(const std::vector<Node*>& list, Node* target); // Function declaration for FindNodeInList
+};
