@@ -1,6 +1,6 @@
 #include "NodeMap.h"
 #include <iostream>
-#include <raygui.h>
+#include <raylib.h>
 
 using namespace AIForGames;
 
@@ -163,10 +163,6 @@ std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
         {
             break;
         }
-        // Sorting the openList above guarantees the shortest path is found,
-        // given no negative costs (a prerequisite of the algorithm).
-        // This is an optional optimisation that improves performance,
-        // but doesn’t always guarantee the shortest path.
         // Remove currentNode from OpenList
         openList.erase(openList.begin());
         //  Add currentNode to closedList
@@ -179,7 +175,7 @@ std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
                 continue;
             }
             float gScore = currentNode->gScore + c.cost;
-            float hScore = Heuristic(c.target, endNode);
+            float hScore = glm::distance(c.target->position, endNode->position);
             float fScore = gScore + hScore;
 
             if (FindNodeInList(openList, c.target))// If c.target not in openList
@@ -205,7 +201,7 @@ std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
     while (currentNode != nullptr)
     {
         pathList.push_back(currentNode);
-        currentNode = currentNode->previous;
+        currentNode = currentNode->parent;
     }
     std::reverse(pathList.begin(), pathList.end());
     // Return the path for navigation between startNode/endNode

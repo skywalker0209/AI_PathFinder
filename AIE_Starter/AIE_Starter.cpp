@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 
     Node* start = nodeMap.GetNode(1, 1);
     Node* end = nodeMap.GetNode(10, 2);
-    std::vector<Node*> nodeMapPath = NodeMap::AStarSearch(start, end);
+    std::vector<Node*> path = NodeMap::AStarSearch(start, end);
     Color lineColor = { 255, 255, 255, 255 };;
 
     // Main game loop
@@ -66,7 +66,6 @@ int main(int argc, char* argv[])
             Vector2 mousePos = GetMousePosition();
             Node* target = nodeMap.GetClosestNode(glm::vec2(mousePos.x, mousePos.y));
             start = target == nullptr ? start : target;
-            nodeMapPath = NodeMap::AStarSearch(start, end);
         }
 
         if (IsMouseButtonPressed(1))
@@ -74,7 +73,6 @@ int main(int argc, char* argv[])
             Vector2 mousePos = GetMousePosition();
             Node* target = nodeMap.GetClosestNode(glm::vec2(mousePos.x, mousePos.y));
             end = target == nullptr ? end : target;
-            nodeMapPath = NodeMap::AStarSearch(start, end);
         }
 
         //----------------------------------------------------------------------------------
@@ -89,7 +87,7 @@ int main(int argc, char* argv[])
 
         nodeMap.Draw();
 
-        NodeMap::DrawPath(nodeMapPath, lineColor);
+        NodeMap::DrawPath(path, lineColor);
 
 
 

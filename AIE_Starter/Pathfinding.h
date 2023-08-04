@@ -26,7 +26,7 @@ namespace AIForGames
         float fScore;
         float gScore;
         Node* previous;
-
+        Node* parent;
 
         Node(float x, float y)
         {
