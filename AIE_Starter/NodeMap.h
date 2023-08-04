@@ -23,8 +23,10 @@ public:
 	}
 	void Draw();
 	static std::vector<Node*> AStarSearch(Node* startNode, Node* endNode);
+
 	static void DrawPath(const std::vector<Node*>& path, Color& color);
 	Node* GetClosestNode(glm::vec2 worldPos);
+	
 	static void BubbleSort(std::vector<Node*>& list);
 	static Node* FindNodeInList(const std::vector<Node*>& list, Node* target); // Function declaration for FindNodeInList
 

@@ -144,11 +144,11 @@ std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
 
     // Initialise the starting node
     startNode->gScore = 0;
-    startNode->parent = nullptr;
+    startNode->previous = nullptr;
 
     // Create our temporary lists for storing nodes we’re visiting/visited
-    std::vector<Node*> openList;
-    std::vector<Node*> closeList;
+    std::vector<Node*> openList = std::vector<Node*>();
+    std::vector<Node*> closeList = std::vector<Node*>();
     openList.push_back(startNode);
    
     //While openList is not empty, sort openList by node.fScore
@@ -182,7 +182,7 @@ std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
             {
                 c.target->gScore = gScore;
                 c.target->fScore = fScore;
-                c.target->parent = currentNode;
+                c.target->previous = currentNode;
                 openList.push_back(c.target);
                
             }
@@ -190,18 +190,18 @@ std::vector<Node*> NodeMap::AStarSearch(Node* startNode, Node* endNode)
             {
                 c.target->gScore = gScore;
                 c.target->fScore = fScore;
-                c.target->parent = currentNode;
+                c.target->previous = currentNode;
             }
         }
     }
 
     // Create Path in reverse from endNode to startNode
-    std::vector<Node*> pathList;
+    std::vector<Node*> pathList = std::vector<Node*>();
     Node* currentNode = endNode;
     while (currentNode != nullptr)
     {
-        pathList.push_back(currentNode);
-        currentNode = currentNode->parent;
+        pathList.push_back (currentNode);
+        currentNode = currentNode->previous;
     }
     std::reverse(pathList.begin(), pathList.end());
     // Return the path for navigation between startNode/endNode

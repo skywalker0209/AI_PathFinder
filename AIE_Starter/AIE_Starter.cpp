@@ -54,6 +54,7 @@ int main(int argc, char* argv[])
 
     Node* start = nodeMap.GetNode(1, 1);
     Node* end = nodeMap.GetNode(10, 2);
+
     std::vector<Node*> path = NodeMap::AStarSearch(start, end);
     Color lineColor = { 255, 255, 255, 255 };;
 
