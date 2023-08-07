@@ -68,8 +68,8 @@ void NodeMap::Init(std::vector<std::string> asciiMap, int cellSize)
 
 void NodeMap::Draw()
 {
-    Color cellColor{ 255,0,0,255 };
-    Color lineColor{ 255,255,255,50 };
+    Texture2D grassLawn = LoadTexture("natural_tilesets/grass.png");
+    Texture2D pathLawn = LoadTexture("natural_tilesets/tile01.png");
 
     for (int y = 0; y < height; y++)
     {
@@ -78,26 +78,15 @@ void NodeMap::Draw()
             Node* node = GetNode(x, y);
             if (node == nullptr)
             {
-                DrawRectangle
-                (
-                    (int)(x * cellSize),
-                    (int)(y * cellSize),
-                    (int)cellSize - 1,
-                    (int)cellSize - 1,
-                    cellColor
-                );
+                DrawTexture(grassLawn, x * cellSize, y * cellSize, WHITE);
                 continue;
             }
             for (int i = 0; i < node->connections.size(); i++)
             {
                 Node* other = node->connections[i].target;
-                DrawLine
-                ((x + 0.5f) * cellSize,
-                    (y + 0.5f) * cellSize,
-                    (int)other->position.x,
-                    (int)other->position.y,
-                    lineColor
-                );
+                DrawTexture(pathLawn, x*cellSize, y*cellSize, WHITE);
+                  
+          
             }
         }
     }
